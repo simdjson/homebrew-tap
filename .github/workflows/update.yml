@@ -1,0 +1,64 @@
+name: update
+
+# Follows sjq's releases: when the latest release is newer than the formula
+# and has its macOS and Linux binaries, the formula is regenerated (with
+# scripts/package_manifests.py of that release), checked by Homebrew and
+# committed.
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sjq:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Compare with the latest release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh release view --repo simdjson/sjq --json tagName --jq .tagName)
+          current=$(grep -o 'releases/download/v[^/]*' Formula/sjq.rb | head -1 | sed 's|releases/download/||')
+          echo "latest $latest, formula $current"
+          if [ "$latest" = "$current" ]; then
+            echo "update=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          curl -fsSL -o "$RUNNER_TEMP/package_manifests.py" \
+            "https://raw.githubusercontent.com/simdjson/sjq/$latest/scripts/package_manifests.py"
+          python3 "$RUNNER_TEMP/package_manifests.py" "$latest" "$RUNNER_TEMP/packaging"
+          if [ ! -f "$RUNNER_TEMP/packaging/homebrew/sjq.rb" ]; then
+            echo "$latest does not have all its binaries yet"
+            echo "update=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          cp "$RUNNER_TEMP/packaging/homebrew/sjq.rb" Formula/sjq.rb
+          echo "update=true" >> "$GITHUB_OUTPUT"
+          echo "tag=$latest" >> "$GITHUB_OUTPUT"
+      # brew tap clones the repository: the new formula is committed first,
+      # and pushed only if Homebrew accepts it.
+      - name: Commit locally
+        if: steps.check.outputs.update == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "sjq ${{ steps.check.outputs.tag }}"
+      - name: Set up Homebrew
+        if: steps.check.outputs.update == 'true'
+        uses: Homebrew/actions/setup-homebrew@main
+      - name: Check the new formula
+        if: steps.check.outputs.update == 'true'
+        run: |
+          brew tap simdjson/tap "$GITHUB_WORKSPACE"
+          brew trust simdjson/tap
+          brew audit --strict simdjson/tap/sjq
+          brew install simdjson/tap/sjq
+          brew test simdjson/tap/sjq
+      - name: Push
+        if: steps.check.outputs.update == 'true'
+        run: git push origin HEAD:main
