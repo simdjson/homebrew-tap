@@ -40,8 +40,8 @@ jobs:
           cp "$RUNNER_TEMP/packaging/homebrew/sjq.rb" Formula/sjq.rb
           echo "update=true" >> "$GITHUB_OUTPUT"
           echo "tag=$latest" >> "$GITHUB_OUTPUT"
-      # brew tap clones the repository: the new formula is committed first,
-      # and pushed only if Homebrew accepts it.
+      # setup-homebrew taps this repository as simdjson/tap; the new formula
+      # is committed first, and pushed only if Homebrew accepts it.
       - name: Commit locally
         if: steps.check.outputs.update == 'true'
         run: |
@@ -54,7 +54,6 @@ jobs:
       - name: Check the new formula
         if: steps.check.outputs.update == 'true'
         run: |
-          brew tap simdjson/tap "$GITHUB_WORKSPACE"
           brew trust simdjson/tap
           brew audit --strict simdjson/tap/sjq
           brew install simdjson/tap/sjq

@@ -21,7 +21,6 @@ jobs:
         uses: Homebrew/actions/setup-homebrew@main
       - name: Install and test the formulas
         run: |
-          brew tap simdjson/tap "$GITHUB_WORKSPACE"
           brew trust simdjson/tap
           brew audit --strict simdjson/tap/sjq
           brew install simdjson/tap/sjq
