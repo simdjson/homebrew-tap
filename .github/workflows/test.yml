@@ -1,0 +1,29 @@
+name: test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+      - name: Install and test the formulas
+        run: |
+          brew tap simdjson/tap "$GITHUB_WORKSPACE"
+          brew trust simdjson/tap
+          brew audit --strict simdjson/tap/sjq
+          brew install simdjson/tap/sjq
+          brew test simdjson/tap/sjq
+          sjq --version
