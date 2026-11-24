@@ -36,20 +36,22 @@ jobs:
             echo "update=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          cp "$RUNNER_TEMP/packaging/homebrew/sjq.rb" Formula/sjq.rb
           echo "update=true" >> "$GITHUB_OUTPUT"
           echo "tag=$latest" >> "$GITHUB_OUTPUT"
-      # setup-homebrew taps this repository as simdjson/tap; the new formula
-      # is committed first, and pushed only if Homebrew accepts it.
-      - name: Commit locally
-        if: steps.check.outputs.update == 'true'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -am "sjq ${{ steps.check.outputs.tag }}"
+      # setup-homebrew taps this repository as simdjson/tap and resets the
+      # checkout: it comes first, then the new formula is committed, checked,
+      # and pushed only if Homebrew accepts it.
       - name: Set up Homebrew
         if: steps.check.outputs.update == 'true'
         uses: Homebrew/actions/setup-homebrew@main
+      - name: Commit locally
+        if: steps.check.outputs.update == 'true'
+        run: |
+          cp "$RUNNER_TEMP/packaging/homebrew/sjq.rb" Formula/sjq.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "sjq ${{ steps.check.outputs.tag }}"
+          grep -m1 'releases/download' Formula/sjq.rb
       - name: Check the new formula
         if: steps.check.outputs.update == 'true'
         run: |
@@ -57,6 +59,8 @@ jobs:
           brew audit --strict simdjson/tap/sjq
           brew install simdjson/tap/sjq
           brew test simdjson/tap/sjq
+          tag="${{ steps.check.outputs.tag }}"
+          "$(brew --prefix)/bin/sjq" --version | grep -F "sjq ${tag#v} "
       # setup-homebrew drops the credentials that checkout stored.
       - name: Push
         if: steps.check.outputs.update == 'true'
