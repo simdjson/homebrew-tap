@@ -1,9 +1,8 @@
 name: update
 
 # Follows sjq's releases: when the latest release is newer than the formula
-# and has its macOS and Linux binaries, the formula is regenerated (with
-# scripts/package_manifests.py of that release), checked by Homebrew and
-# committed.
+# and has all its binaries, the formula is regenerated (with sjq's current
+# scripts/package_manifests.py), checked by Homebrew and committed.
 on:
   schedule:
     - cron: '17 */6 * * *'
@@ -30,7 +29,7 @@ jobs:
             exit 0
           fi
           curl -fsSL -o "$RUNNER_TEMP/package_manifests.py" \
-            "https://raw.githubusercontent.com/simdjson/sjq/$latest/scripts/package_manifests.py"
+            "https://raw.githubusercontent.com/simdjson/sjq/main/scripts/package_manifests.py"
           python3 "$RUNNER_TEMP/package_manifests.py" "$latest" "$RUNNER_TEMP/packaging"
           if [ ! -f "$RUNNER_TEMP/packaging/homebrew/sjq.rb" ]; then
             echo "$latest does not have all its binaries yet"
