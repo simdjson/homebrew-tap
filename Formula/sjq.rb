@@ -6,23 +6,23 @@ class Sjq < Formula
   on_macos do
     # One universal binary for Apple silicon and Intel.
     on_arm do
-      url "https://github.com/simdjson/sjq/releases/download/v0.3.0/sjq-macos-universal.tar.gz"
-      sha256 "a133be40d5fb9ab155620ad375d6462eb536536f239496e8a8d2f1c15115eb9a"
+      url "https://github.com/simdjson/sjq/releases/download/v0.4.0/sjq-macos-universal.tar.gz"
+      sha256 "c49ead829de672688dfc1645ac66195f06c3e630d42676fb369372371ebf5ff2"
     end
     on_intel do
-      url "https://github.com/simdjson/sjq/releases/download/v0.3.0/sjq-macos-universal.tar.gz"
-      sha256 "a133be40d5fb9ab155620ad375d6462eb536536f239496e8a8d2f1c15115eb9a"
+      url "https://github.com/simdjson/sjq/releases/download/v0.4.0/sjq-macos-universal.tar.gz"
+      sha256 "c49ead829de672688dfc1645ac66195f06c3e630d42676fb369372371ebf5ff2"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/simdjson/sjq/releases/download/v0.3.0/sjq-linux-aarch64.tar.gz"
-      sha256 "95bb5a1bef8ad015f5a4ce1789c767cef4713f4057da1b35eae60b8a19924d81"
+      url "https://github.com/simdjson/sjq/releases/download/v0.4.0/sjq-linux-aarch64.tar.gz"
+      sha256 "5f79eef76ec94c3ec90b6ec9338640c6000590cc4530c48f477702d5726acbc9"
     end
     on_intel do
-      url "https://github.com/simdjson/sjq/releases/download/v0.3.0/sjq-linux-x86_64.tar.gz"
-      sha256 "9ca56713c137868663d8fb6068ec3c29caa7fd9681a616e17f902bae91338ab1"
+      url "https://github.com/simdjson/sjq/releases/download/v0.4.0/sjq-linux-x86_64.tar.gz"
+      sha256 "01d3e4eeee6460ba1f7d9e3881defec98c5f98f57dd9d87789cc0ed7fd50fcd7"
     end
   end
 
